@@ -9,8 +9,10 @@ public class  ChatServer {
 	Vector<HandleClient> clients = new Vector<HandleClient>();
 
 	public void process() throws Exception  {
-		ServerSocket server = new ServerSocket(9999,10);
+		ServerSocket server = new ServerSocket(9999,10,InetAddress.getLocalHost());
 		out.println("Server Started...");
+		out.println("IP Address: "+InetAddress.getLocalHost());
+		out.println("Port: "+9999);
 		while( true) {
 			Socket client = server.accept();
 			HandleClient c = new HandleClient(client);

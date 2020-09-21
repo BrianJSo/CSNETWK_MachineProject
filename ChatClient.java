@@ -8,7 +8,7 @@ import static java.lang.System.out;
 
 public class  ChatClient extends JFrame implements ActionListener {
     static JFrame serverConnectFrame;
-    static JTextField tfAddress, tfPort;
+    static JTextField tfAddress, tfPort, tfName;
     String uname;
     PrintWriter pw;
     BufferedReader br;
@@ -18,10 +18,10 @@ public class  ChatClient extends JFrame implements ActionListener {
     Socket client;
     JFileChooser fc;
     
-    public ChatClient(String uname,String servername) throws Exception {
+    public ChatClient(String uname,String serverAddress,int serverPort) throws Exception {
         super(uname);  // set title for frame
         this.uname = uname;
-        client  = new Socket(servername,9999);
+        client = new Socket(serverAddress,serverPort);
         br = new BufferedReader( new InputStreamReader( client.getInputStream()) ) ;
         pw = new PrintWriter(client.getOutputStream(),true);
         pw.println(uname);  // send name to server
@@ -95,6 +95,23 @@ public class  ChatClient extends JFrame implements ActionListener {
         tfPort = new JTextField(20);
         portPane.add(lblPort);
         portPane.add(tfPort);
+        tfPort.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent ke) {
+                String value = tfPort.getText();
+                int l = value.length();
+                if ((ke.getKeyChar() >= '0' && ke.getKeyChar() <= '9')||(ke.getKeyCode() == KeyEvent.VK_BACK_SPACE)) {
+                    tfPort.setEditable(true);
+                } else {
+                    tfPort.setEditable(false);
+                }
+            }
+        });
+
+        JPanel namePane = new JPanel();
+        JLabel lblName = new JLabel("Name:         ");
+        tfName = new JTextField("Bob",20);
+        namePane.add(lblName);
+        namePane.add(tfName);
 
         JButton btnConnect = new JButton("Connect to server");
         btnConnect.addActionListener(new connectToServer());
@@ -102,21 +119,19 @@ public class  ChatClient extends JFrame implements ActionListener {
         serverConnectFrame.setLayout(new FlowLayout());
         serverConnectFrame.add(addressPane);
         serverConnectFrame.add(portPane);
+        serverConnectFrame.add(namePane);
         serverConnectFrame.add(btnConnect);
         serverConnectFrame.setVisible(true);
 
-        // String name = JOptionPane.showInputDialog(null,"Server IP address:", "Input IP Address",
-        //      JOptionPane.PLAIN_MESSAGE);
-        // String s = JOptionPane.showInputDialog(null,"Server port number:", "Input port number",
-        //      JOptionPane.PLAIN_MESSAGE);
     } // end of main
 
     static class connectToServer implements ActionListener {
         public void actionPerformed(ActionEvent e){
-            String servername = "localhost";
-            String name = "Brian";
+            String serverAddress = tfAddress.getText();
+            String serverPort = tfPort.getText();
+            String name = tfName.getText();
             try {
-                new ChatClient( name ,servername);
+                new ChatClient( name ,serverAddress, Integer.parseInt(serverPort));
                 serverConnectFrame.setVisible(false);
             } catch(Exception ex) {
                 out.println( "Error --> " + ex.getMessage());
