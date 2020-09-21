@@ -7,6 +7,8 @@ import java.awt.event.*;
 import static java.lang.System.out;
 
 public class  ChatClient extends JFrame implements ActionListener {
+    static JFrame serverConnectFrame;
+    static JTextField tfAddress, tfPort;
     String uname;
     PrintWriter pw;
     BufferedReader br;
@@ -77,18 +79,50 @@ public class  ChatClient extends JFrame implements ActionListener {
     }
     
     public static void main(String ... args) {
-    
-        // take username from user
-        String name = JOptionPane.showInputDialog(null,"Enter your name :", "Username",
-             JOptionPane.PLAIN_MESSAGE);
-        String servername = "localhost";  
-        try {
-            new ChatClient( name ,servername);
-        } catch(Exception ex) {
-            out.println( "Error --> " + ex.getMessage());
-        }
-        
+
+        serverConnectFrame = new JFrame("Connect to server");
+        serverConnectFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        serverConnectFrame.setBounds(200,100,400,200);
+
+        JPanel addressPane = new JPanel();
+        JLabel lblAddress = new JLabel("IP Address:");
+        tfAddress = new JTextField(20);
+        addressPane.add(lblAddress);
+        addressPane.add(tfAddress);
+
+        JPanel portPane = new JPanel();
+        JLabel lblPort = new JLabel("Port no. :   ");
+        tfPort = new JTextField(20);
+        portPane.add(lblPort);
+        portPane.add(tfPort);
+
+        JButton btnConnect = new JButton("Connect to server");
+        btnConnect.addActionListener(new connectToServer());
+
+        serverConnectFrame.setLayout(new FlowLayout());
+        serverConnectFrame.add(addressPane);
+        serverConnectFrame.add(portPane);
+        serverConnectFrame.add(btnConnect);
+        serverConnectFrame.setVisible(true);
+
+        // String name = JOptionPane.showInputDialog(null,"Server IP address:", "Input IP Address",
+        //      JOptionPane.PLAIN_MESSAGE);
+        // String s = JOptionPane.showInputDialog(null,"Server port number:", "Input port number",
+        //      JOptionPane.PLAIN_MESSAGE);
     } // end of main
+
+    static class connectToServer implements ActionListener {
+        public void actionPerformed(ActionEvent e){
+            String servername = "localhost";
+            String name = "Brian";
+            try {
+                new ChatClient( name ,servername);
+                serverConnectFrame.setVisible(false);
+            } catch(Exception ex) {
+                out.println( "Error --> " + ex.getMessage());
+            }
+        }
+    }
     
     // inner class for Messages Thread
     class  MessagesThread extends Thread {
@@ -103,3 +137,50 @@ public class  ChatClient extends JFrame implements ActionListener {
         }
     }
 } //  end of client
+
+
+/*
+import java.net.*;
+import java.io.*;
+
+public class FileClient
+{
+	public static void main(String[] args)
+	{
+		String sServerAddress = args[0];
+		int nPort = Integer.parseInt(args[1]);
+		File file = new File("Received.txt");
+		
+		try
+		{
+			Socket clientEndpoint = new Socket(sServerAddress, nPort);
+			
+			System.out.println("Client: Connected to server at " + clientEndpoint.getRemoteSocketAddress());
+			
+			file.createNewFile();
+			DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
+			
+			DataInputStream disReader = new DataInputStream(clientEndpoint.getInputStream());
+
+			int count;
+			byte[] buffer = new byte[8192];
+			while ((count = disReader.read(buffer)) > 0)
+			{
+				dosWriter.write(buffer, 0, count);
+			}
+
+			System.out.println("Client: Downloaded file \"Received.txt\"");
+			dosWriter.close();
+			clientEndpoint.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			System.out.println("Client: Connection is terminated.");
+		}
+	}
+}
+*/
