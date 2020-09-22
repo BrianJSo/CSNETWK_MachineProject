@@ -4,6 +4,7 @@ import java.net.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
 import static java.lang.System.out;
 
 public class  ChatClient extends JFrame implements ActionListener {
@@ -14,7 +15,7 @@ public class  ChatClient extends JFrame implements ActionListener {
     BufferedReader br;
     JTextArea  taMessages;
     JTextField tfInput;
-    JButton btnSend,btnFile,btnExit;
+    JButton btnSend,btnFile,btnExit,btnLogs;
     Socket client;
     JFileChooser fc;
     
@@ -33,6 +34,7 @@ public class  ChatClient extends JFrame implements ActionListener {
         btnSend = new JButton("Send");
         btnFile = new JButton("File");
         btnExit = new JButton("Exit");
+        btnLogs = new JButton("Logs");
         taMessages = new JTextArea();
         taMessages.setRows(10);
         taMessages.setColumns(50);
@@ -46,10 +48,18 @@ public class  ChatClient extends JFrame implements ActionListener {
         bp.add(btnSend);
         bp.add(btnFile);
         bp.add(btnExit);
+        bp.add(btnLogs);
         add(bp,"South");
         btnSend.addActionListener(this);
         btnFile.addActionListener(this);
         btnExit.addActionListener(this);
+        btnLogs.addActionListener(this);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                pw.println("serverCommandEnd");  // send end to server so that server know about the termination
+                System.exit(0);
+            }
+        });
         setSize(500,300);
         setVisible(true);
         pack();
@@ -57,10 +67,9 @@ public class  ChatClient extends JFrame implements ActionListener {
     
     public void actionPerformed(ActionEvent evt) {
         if ( evt.getSource() == btnExit ) {
-            pw.println("end");  // send end to server so that server know about the termination
+            pw.println("serverCommandEnd");  // send end to server so that server know about the termination
             System.exit(0);
         } else if ( evt.getSource() == btnFile ){
-            System.out.println("here");
             fc = new JFileChooser();
             fc.setCurrentDirectory(new java.io.File("c:\\"));
             fc.setDialogTitle("Choose file to send");
@@ -70,6 +79,8 @@ public class  ChatClient extends JFrame implements ActionListener {
             }
             System.out.println(fc.getSelectedFile().getAbsolutePath());
             taMessages.append("You: sent a file.\n");
+        } else if ( evt.getSource() == btnLogs ){
+            pw.println("serverCommandGetLogs");
         }  else {
             // send message to server
             pw.println(tfInput.getText());
@@ -146,7 +157,30 @@ public class  ChatClient extends JFrame implements ActionListener {
             try {
                 while(true) {
                     line = br.readLine();
-                    taMessages.append(line + "\n");
+                    if(line.substring(0, 4).equals("Logs")){
+                        out.println("logging");
+                        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                        try {
+                            File logFile = new File("log"+timestamp.getTime()+".txt");
+                            PrintWriter logWriter = new PrintWriter(logFile);
+
+                            String curLine = line.substring(6);
+                            while(!curLine.equals("endOfLogs")){
+                                out.println(curLine);
+                                logWriter.println(curLine);
+                                curLine = br.readLine();
+                            }
+                            out.println("end of logging");
+                            logWriter.flush();
+                            logWriter.close();
+                            System.out.println("Successfully wrote to the file.");
+                        } catch (IOException e) {
+                            System.out.println("Cannot create text file");
+                            e.printStackTrace();
+                        }
+                    } else {
+                        taMessages.append(line + "\n");
+                    }
                 } // end of while
             } catch(Exception ex) {}
         }

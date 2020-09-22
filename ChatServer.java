@@ -77,7 +77,7 @@ public class  ChatServer {
 			try {
                 while(true) {
 					line = input.readLine();
-					if ( line.equals("end") ) {
+					if ( line.equals("serverCommandEnd") ) {
 						broadcast("Server", name+" disconnected.");
 						clients.remove(this);
 						users.remove(name);
@@ -85,14 +85,23 @@ public class  ChatServer {
 
 						if(users.size() == 0){
 							out.println("No users connected");
-							out.println(logs);
 							out.println("Terminating connection");
 							out.println("Server shutting down");
 							System.exit(0);
 						}
 						break;
+					} else if ( line.equals("serverCommandGetLogs") ){
+						String strLogs = "";
+						for(String log: logs){
+							strLogs += log+"\n";
+						}
+						strLogs += "endOfLogs";
+						sendMessage("Logs", strLogs);
+					} else if (users.size() < 2){
+						sendMessage("Server", "message not broadcasted. No users to send to");
+					} else {
+						broadcast(name,line); // method  of outer class - send messages to all
 					}
-					broadcast(name,line); // method  of outer class - send messages to all
 				} // end of while
 			} catch(Exception ex) {
 				System.out.println(ex.getMessage());
