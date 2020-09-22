@@ -13,7 +13,7 @@ public class  ChatServer {
 		out.println("Server Started...");
 		out.println("IP Address: "+InetAddress.getLocalHost());
 		out.println("Port: "+9999);
-		while( true) {
+		while(true) {
 			Socket client = server.accept();
 			HandleClient c = new HandleClient(client);
 			clients.add(c);
@@ -24,7 +24,7 @@ public class  ChatServer {
 		new ChatServer().process();
 	} // end of main
 
-	public void boradcast(String user, String message)  {
+	public void broadcast(String user, String message)  {
 			// send message to all connected users
 			for ( HandleClient c : clients )
 				if ( ! c.getUserName().equals(user) )
@@ -60,11 +60,19 @@ public class  ChatServer {
                 while(true) {
 					line = input.readLine();
 					if ( line.equals("end") ) {
+						broadcast("Server", name+" disconnected.");
 						clients.remove(this);
 						users.remove(name);
+
+						if(users.size() == 0){
+							out.println("No users connected");
+							out.println("Terminating connection");
+							out.println("Server shutting down");
+							System.exit(0);
+						}
 						break;
 					}
-					boradcast(name,line); // method  of outer class - send messages to all
+					broadcast(name,line); // method  of outer class - send messages to all
 				} // end of while
 			} catch(Exception ex) {
 				System.out.println(ex.getMessage());
