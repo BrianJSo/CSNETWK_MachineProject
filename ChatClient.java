@@ -19,7 +19,7 @@ public class  ChatClient extends JFrame implements ActionListener {
     JFileChooser fc;
     
     public ChatClient(String uname,String serverAddress,int serverPort) throws Exception {
-        super(uname);  // set title for frame
+        super("DLSUsap "+uname);  // set title for frame
         this.uname = uname;
         client = new Socket(serverAddress,serverPort);
         br = new BufferedReader( new InputStreamReader( client.getInputStream()) ) ;
@@ -69,7 +69,7 @@ public class  ChatClient extends JFrame implements ActionListener {
                 
             }
             System.out.println(fc.getSelectedFile().getAbsolutePath());
-            taMessages.append("You: " + "sent a file" + "\n");
+            taMessages.append("You: sent a file.\n");
         }  else {
             // send message to server
             pw.println(tfInput.getText());

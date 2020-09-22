@@ -2,11 +2,13 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.sql.Timestamp;
 import static java.lang.System.out;
 
 public class  ChatServer {
 	Vector<String> users = new Vector<String>();
 	Vector<HandleClient> clients = new Vector<HandleClient>();
+	Vector<String> logs = new Vector<String>();
 
 	public void process() throws Exception  {
 		ServerSocket server = new ServerSocket(9999,10,InetAddress.getLocalHost());
@@ -24,11 +26,25 @@ public class  ChatServer {
 		new ChatServer().process();
 	} // end of main
 
+	public void addLog(String source, String dest, String activity){
+		Timestamp time = new Timestamp(System.currentTimeMillis());
+		String log = time+" "+source+" to "+dest+" "+activity;
+		logs.add(log);
+		out.println(log);
+	}
+
 	public void broadcast(String user, String message)  {
-			// send message to all connected users
-			for ( HandleClient c : clients )
-				if ( ! c.getUserName().equals(user) )
-					c.sendMessage(user,message);
+
+		// send message to all connected users
+		String destination = "";
+		for ( HandleClient c : clients )
+			if ( ! c.getUserName().equals(user) ){
+				c.sendMessage(user,message);
+				destination += ","+c.getUserName();
+			}
+		if( ! user.equals("Server")){
+			addLog(user, destination.substring(1), "Message");
+		}
 	}
 
 	class  HandleClient extends Thread {
@@ -43,6 +59,8 @@ public class  ChatServer {
 			// read name
 			name  = input.readLine();
 			users.add(name); // add to vector
+			addLog(name, "Server", "Login");
+			broadcast("Server", name+" has joined the chat.");
 			start();
 		}
 
@@ -63,9 +81,11 @@ public class  ChatServer {
 						broadcast("Server", name+" disconnected.");
 						clients.remove(this);
 						users.remove(name);
+						addLog(name, "Server", "Logout");
 
 						if(users.size() == 0){
 							out.println("No users connected");
+							out.println(logs);
 							out.println("Terminating connection");
 							out.println("Server shutting down");
 							System.exit(0);
