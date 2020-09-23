@@ -58,7 +58,18 @@ public class  ChatServer {
 			output = new PrintWriter ( client.getOutputStream(),true);
 			// read name
 			name  = input.readLine();
+
+			String curUsers = "";
+			for(String user: users){
+				curUsers += ", "+user;
+			}
 			users.add(name); // add to vector
+
+			if(users.size()<2){
+				sendMessage("Server","Successfully joined chat. No other participants.");
+			} else {
+				sendMessage("Server","Successfully joined chat. Now chatting with "+curUsers.substring(2));
+			}
 			addLog(name, "Server", "Login");
 			broadcast("Server", name+" has joined the chat.");
 			start();

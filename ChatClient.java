@@ -173,7 +173,8 @@ public class  ChatClient extends JFrame implements ActionListener {
                             out.println("end of logging");
                             logWriter.flush();
                             logWriter.close();
-                            System.out.println("Successfully wrote to the file.");
+                            taMessages.append("Server: Logs written to "+logFile.getName());
+                            System.out.println("Successfully wrote to "+logFile.getName());
                         } catch (IOException e) {
                             System.out.println("Cannot create text file");
                             e.printStackTrace();
