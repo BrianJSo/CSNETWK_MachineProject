@@ -10,6 +10,7 @@ import static java.lang.System.out;
 public class  ChatClient extends JFrame implements ActionListener {
     static JFrame serverConnectFrame;
     static JTextField tfAddress, tfPort, tfName;
+    static JLabel lblError;
     String uname;
     PrintWriter pw;
     BufferedReader br;
@@ -77,8 +78,11 @@ public class  ChatClient extends JFrame implements ActionListener {
             if(fc.showOpenDialog(btnFile)==JFileChooser.APPROVE_OPTION){
                 
             }
-            System.out.println(fc.getSelectedFile().getAbsolutePath());
-            taMessages.append("You: sent a file.\n");
+            File curFile = fc.getSelectedFile();
+            System.out.println(curFile.getAbsolutePath());
+            taMessages.append("You: sent "+curFile.getName()+".\n");
+
+
         } else if ( evt.getSource() == btnLogs ){
             pw.println("serverCommandGetLogs");
         }  else {
@@ -120,18 +124,26 @@ public class  ChatClient extends JFrame implements ActionListener {
 
         JPanel namePane = new JPanel();
         JLabel lblName = new JLabel("Name:         ");
-        tfName = new JTextField("Bob",20);
+        tfName = new JTextField(20);
         namePane.add(lblName);
         namePane.add(tfName);
 
+
+        JPanel connectPane = new JPanel();
         JButton btnConnect = new JButton("Connect to server");
         btnConnect.addActionListener(new connectToServer());
+        connectPane.add(btnConnect);
+
+        JPanel errorPane = new JPanel();
+        lblError = new JLabel("");
+        errorPane.add(lblError);
 
         serverConnectFrame.setLayout(new FlowLayout());
         serverConnectFrame.add(addressPane);
         serverConnectFrame.add(portPane);
         serverConnectFrame.add(namePane);
-        serverConnectFrame.add(btnConnect);
+        serverConnectFrame.add(connectPane);
+        serverConnectFrame.add(errorPane);
         serverConnectFrame.setVisible(true);
 
     } // end of main
@@ -142,9 +154,15 @@ public class  ChatClient extends JFrame implements ActionListener {
             String serverPort = tfPort.getText();
             String name = tfName.getText();
             try {
-                new ChatClient( name ,serverAddress, Integer.parseInt(serverPort));
-                serverConnectFrame.setVisible(false);
+                if(!name.equals("")){
+                    new ChatClient( name ,serverAddress, Integer.parseInt(serverPort));
+                    serverConnectFrame.setVisible(false);
+                } else {
+                    lblError.setText("Error: Name field is required");
+                    out.println( "Error --> Name field is required");
+                }
             } catch(Exception ex) {
+                lblError.setText("Error: "+ ex.getMessage());
                 out.println( "Error --> " + ex.getMessage());
             }
         }
