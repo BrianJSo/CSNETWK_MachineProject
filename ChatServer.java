@@ -91,10 +91,26 @@ public class  ChatServer {
 		public void sendFile(String uname, File  file)  {
 			sendMessage(uname,"sent "+file.getName());
 			output.println("File");
+			output.println(file.getName());
+			try{
+				DataInputStream disReader = new DataInputStream(new FileInputStream(file));
+				DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());
+				int count;
+				byte[] buffer = new byte[8192];
+				while ((count = disReader.read(buffer)) > 0)
+				{
+					dosWriter.write(buffer, 0, count);
+				}
+				dosWriter.flush();
+				out.println("Done here");
+				disReader.close();
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 		
         public String getUserName() {  
-            return name; 
+            return name;
         }
 
         public void run()  {
@@ -102,7 +118,7 @@ public class  ChatServer {
 			try {
                 while(true) {
 					line = input.readLine();
-					if ( line.equals("serverCommandEnd") ) {
+					if ( line.equals("serverCommandEnd") ) { // client exit
 						broadcast("Server", name+" disconnected.");
 						clients.remove(this);
 						users.remove(name);
@@ -115,14 +131,14 @@ public class  ChatServer {
 							System.exit(0);
 						}
 						break;
-					} else if ( line.equals("serverCommandGetLogs") ){
+					} else if ( line.equals("serverCommandGetLogs") ){ // logs request
 						String strLogs = "";
 						for(String log: logs){
 							strLogs += log+"\n";
 						}
 						strLogs += "endOfLogs";
 						sendMessage("Logs", strLogs);
-					} else if ( line.equals("serverCommandFile") ){
+					} else if ( line.equals("serverCommandFile") ){ // file receive from client to server
 
 						String filename = input.readLine();
 						File dir = new File("serverTemp");
@@ -160,52 +176,3 @@ public class  ChatServer {
    } // end of inner class
 
 } // end of Server
-
-/*
-import java.net.*;
-import java.io.*;
-
-public class FileServer
-{
-	public static void main(String[] args)
-	{
-		int nPort = Integer.parseInt(args[0]);
-		System.out.println("Server: Listening on port " + args[0] + "...");
-		ServerSocket serverSocket;
-		Socket serverEndpoint;
-		File file = new File("./Download.txt");
-
-		try 
-		{
-			serverSocket = new ServerSocket(nPort);
-			serverEndpoint = serverSocket.accept();
-			
-			System.out.println("Server: New client connected: " + serverEndpoint.getRemoteSocketAddress());
-			
-			DataInputStream disReader = new DataInputStream(new FileInputStream(file));
-			DataOutputStream dosWriter = new DataOutputStream(serverEndpoint.getOutputStream());			
-			
-			System.out.println("Server: Sending file \"Download.txt\" (" + file.length() + " bytes)" );
-
-			int count;
-			byte[] buffer = new byte[8192];
-			while ((count = disReader.read(buffer)) > 0)
-			{
-				dosWriter.write(buffer, 0, count);
-			}
-
-			disReader.close();
-			serverEndpoint.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			System.out.println("Server: Connection is terminated.");
-		}
-	}
-}
-
-*/

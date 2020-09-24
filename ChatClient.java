@@ -2,12 +2,13 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import javax.swing.*;
+import javax.swing.filechooser.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Timestamp;
 import static java.lang.System.out;
 
-public class  ChatClient extends JFrame implements ActionListener {
+public class ChatClient extends JFrame implements ActionListener {
     static JFrame serverConnectFrame;
     static JTextField tfAddress, tfPort, tfName;
     static JLabel lblError;
@@ -70,19 +71,18 @@ public class  ChatClient extends JFrame implements ActionListener {
         if ( evt.getSource() == btnExit ) {
             pw.println("serverCommandEnd");  // send end to server so that server know about the termination
             System.exit(0);
-        } else if ( evt.getSource() == btnFile ){
+        } else if ( evt.getSource() == btnFile ){ // send file to server
             fc = new JFileChooser();
             fc.setCurrentDirectory(new java.io.File("c:\\"));
+            // fc.setCurrentDirectory(new java.io.File("C:\\Users\\LenovoLegion\\Documents\\GitHub\\CSNETWK_MachineProject\\"));
             fc.setDialogTitle("Choose file to send");
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if(fc.showOpenDialog(btnFile)==JFileChooser.APPROVE_OPTION){
                 File curFile = fc.getSelectedFile();
-                System.out.println(curFile.getAbsolutePath());
                 taMessages.append("You: sent "+curFile.getName()+".\n");
 
                 pw.println("serverCommandFile");
                 pw.println(curFile.getName());
-
                 try{
                     DataInputStream disReader = new DataInputStream(new FileInputStream(curFile));
                     DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());			
@@ -94,16 +94,14 @@ public class  ChatClient extends JFrame implements ActionListener {
                         dosWriter.write(buffer, 0, count);
                     }
                     dosWriter.flush();
-                    out.println("done");
                     disReader.close();
-                    out.println("closed file reader");
                 } catch(Exception ex) {
                     ex.printStackTrace();
                 }
             }
-        } else if ( evt.getSource() == btnLogs ){
+        } else if ( evt.getSource() == btnLogs ){ // request logs from server
             pw.println("serverCommandGetLogs");
-        }  else {
+        } else {
             // send message to server
             pw.println(tfInput.getText());
             taMessages.append("You: " + tfInput.getText() + "\n");
@@ -185,6 +183,10 @@ public class  ChatClient extends JFrame implements ActionListener {
             }
         }
     }
+
+    public ChatClient getOuter() {
+        return ChatClient.this;
+    }
     
     // inner class for Messages Thread
     class  MessagesThread extends Thread {
@@ -194,7 +196,6 @@ public class  ChatClient extends JFrame implements ActionListener {
                 while(true) {
                     line = br.readLine();
                     if(line.substring(0, 4).equals("Logs")){
-                        out.println("logging");
                         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                         try {
                             File logFile = new File("log"+timestamp.getTime()+".txt");
@@ -202,18 +203,45 @@ public class  ChatClient extends JFrame implements ActionListener {
 
                             String curLine = line.substring(6);
                             while(!curLine.equals("endOfLogs")){
-                                out.println(curLine);
                                 logWriter.println(curLine);
                                 curLine = br.readLine();
                             }
-                            out.println("end of logging");
                             logWriter.flush();
                             logWriter.close();
                             taMessages.append("Server: Logs written to "+logFile.getName());
-                            System.out.println("Successfully wrote to "+logFile.getName());
                         } catch (IOException e) {
                             System.out.println("Cannot create text file");
                             e.printStackTrace();
+                        }
+                    } else if(line.equals("File")) {
+                        String originalFilename = br.readLine();
+                        String fileType = originalFilename.substring(originalFilename.lastIndexOf('.')+1);
+                        String fileExt = "."+fileType;
+                        FileNameExtensionFilter filter = new FileNameExtensionFilter(fileType, fileExt);
+                        JFileChooser fc = new JFileChooser();
+                        fc.setFileFilter(filter);
+                        fc.setCurrentDirectory(new java.io.File("c:\\"));
+                        // fc.setCurrentDirectory(new java.io.File("C:\\Users\\LenovoLegion\\Documents\\GitHub\\CSNETWK_MachineProject\\"));
+                        fc.setDialogTitle("Save file");
+                        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                        if(fc.showSaveDialog(getOuter())==JFileChooser.APPROVE_OPTION){
+                            File path = fc.getSelectedFile();
+                            File newFile = new File(path.getAbsolutePath()+fileExt);
+                            
+                            newFile.createNewFile();
+
+                            DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(newFile));
+                            DataInputStream disReader = new DataInputStream(client.getInputStream());
+                            int count;
+                            byte[] buffer = new byte[8192];
+                            while ((count = disReader.read(buffer)) > 0)
+                            {
+                                dosWriter.write(buffer, 0, count);
+                                if(disReader.available() < 1){
+                                    break;
+                                }
+                            }
+                            dosWriter.close();
                         }
                     } else {
                         taMessages.append(line + "\n");
@@ -223,50 +251,3 @@ public class  ChatClient extends JFrame implements ActionListener {
         }
     }
 } //  end of client
-
-
-/*
-import java.net.*;
-import java.io.*;
-
-public class FileClient
-{
-	public static void main(String[] args)
-	{
-		String sServerAddress = args[0];
-		int nPort = Integer.parseInt(args[1]);
-		File file = new File("Received.txt");
-		
-		try
-		{
-			Socket clientEndpoint = new Socket(sServerAddress, nPort);
-			
-			System.out.println("Client: Connected to server at " + clientEndpoint.getRemoteSocketAddress());
-			
-			file.createNewFile();
-			DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
-			
-			DataInputStream disReader = new DataInputStream(clientEndpoint.getInputStream());
-
-			int count;
-			byte[] buffer = new byte[8192];
-			while ((count = disReader.read(buffer)) > 0)
-			{
-				dosWriter.write(buffer, 0, count);
-			}
-
-			System.out.println("Client: Downloaded file \"Received.txt\"");
-			dosWriter.close();
-			clientEndpoint.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			System.out.println("Client: Connection is terminated.");
-		}
-	}
-}
-*/
