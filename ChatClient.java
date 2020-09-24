@@ -76,13 +76,30 @@ public class  ChatClient extends JFrame implements ActionListener {
             fc.setDialogTitle("Choose file to send");
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if(fc.showOpenDialog(btnFile)==JFileChooser.APPROVE_OPTION){
-                
+                File curFile = fc.getSelectedFile();
+                System.out.println(curFile.getAbsolutePath());
+                taMessages.append("You: sent "+curFile.getName()+".\n");
+
+                pw.println("serverCommandFile");
+
+                try{
+                    DataInputStream disReader = new DataInputStream(new FileInputStream(curFile));
+                    DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());			
+                    
+                    int count;
+                    byte[] buffer = new byte[8192];
+                    while ((count = disReader.read(buffer)) > 0)
+                    {
+                        dosWriter.write(buffer, 0, count);
+                    }
+                    dosWriter.flush();
+                    out.println("done");
+                    disReader.close();
+                    out.println("closed file reader");
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                }
             }
-            File curFile = fc.getSelectedFile();
-            System.out.println(curFile.getAbsolutePath());
-            taMessages.append("You: sent "+curFile.getName()+".\n");
-
-
         } else if ( evt.getSource() == btnLogs ){
             pw.println("serverCommandGetLogs");
         }  else {

@@ -51,12 +51,13 @@ public class  ChatServer {
 		String name = "";
 		BufferedReader input;
 		PrintWriter output;
+		Socket client;
 
 		public HandleClient(Socket  client) throws Exception {
 			// get input and output streams
 			input = new BufferedReader( new InputStreamReader( client.getInputStream())) ;
 			output = new PrintWriter ( client.getOutputStream(),true);
-			// read name
+			this.client = client;
 			name  = input.readLine();
 
 			String curUsers = "";
@@ -108,6 +109,25 @@ public class  ChatServer {
 						}
 						strLogs += "endOfLogs";
 						sendMessage("Logs", strLogs);
+					} else if ( line.equals("serverCommandFile") ){
+						File file = new File("Received.txt");
+						file.createNewFile();
+
+						DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
+						DataInputStream disReader = new DataInputStream(client.getInputStream());
+
+						int count;
+						byte[] buffer = new byte[8192];
+						while ((count = disReader.read(buffer)) > 0)
+						{
+							dosWriter.write(buffer, 0, count);
+							if(disReader.available() < 1){
+								break;
+							}
+						}
+                		out.println("done");
+						dosWriter.close();
+               			out.println("closed file writer");
 					} else if (users.size() < 2){
 						sendMessage("Server", "message not broadcasted. No users to send to");
 					} else {
