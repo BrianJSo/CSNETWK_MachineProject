@@ -46,6 +46,14 @@ public class  ChatServer {
 			addLog(user, destination.substring(1), "Message");
 		}
 	}
+	
+	public void broadcastFile(String user, File file)  {
+		// send file to all connected users
+		for ( HandleClient c : clients )
+			if ( ! c.getUserName().equals(user) ){
+				c.sendFile(user, file);
+			}
+	}
 
 	class  HandleClient extends Thread {
 		String name = "";
@@ -76,8 +84,13 @@ public class  ChatServer {
 			start();
 		}
 
-		public void sendMessage(String uname,String  msg)  {
+		public void sendMessage(String uname, String  msg)  {
 			output.println( uname + ": " + msg);
+		}
+
+		public void sendFile(String uname, File  file)  {
+			sendMessage(uname,"sent "+file.getName());
+			output.println("File");
 		}
 		
         public String getUserName() {  
@@ -110,7 +123,14 @@ public class  ChatServer {
 						strLogs += "endOfLogs";
 						sendMessage("Logs", strLogs);
 					} else if ( line.equals("serverCommandFile") ){
-						File file = new File("Received.txt");
+
+						String filename = input.readLine();
+						File dir = new File("serverTemp");
+						if( ! dir.exists()){
+							dir.mkdirs();
+						}
+
+						File file = new File("serverTemp/"+filename);
 						file.createNewFile();
 
 						DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
@@ -125,9 +145,8 @@ public class  ChatServer {
 								break;
 							}
 						}
-                		out.println("done");
 						dosWriter.close();
-               			out.println("closed file writer");
+						broadcastFile(name, file);
 					} else if (users.size() < 2){
 						sendMessage("Server", "message not broadcasted. No users to send to");
 					} else {

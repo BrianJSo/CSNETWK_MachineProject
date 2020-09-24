@@ -81,6 +81,7 @@ public class  ChatClient extends JFrame implements ActionListener {
                 taMessages.append("You: sent "+curFile.getName()+".\n");
 
                 pw.println("serverCommandFile");
+                pw.println(curFile.getName());
 
                 try{
                     DataInputStream disReader = new DataInputStream(new FileInputStream(curFile));
