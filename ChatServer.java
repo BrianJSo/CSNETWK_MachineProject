@@ -49,10 +49,13 @@ public class  ChatServer {
 	
 	public void broadcastFile(String user, File file)  {
 		// send file to all connected users
+		String destination = "";
 		for ( HandleClient c : clients )
 			if ( ! c.getUserName().equals(user) ){
 				c.sendFile(user, file);
+				destination += ","+c.getUserName();
 			}
+		addLog(user, destination.substring(1), "FileTransfer");
 	}
 
 	class  HandleClient extends Thread {
@@ -166,11 +169,17 @@ public class  ChatServer {
 						}
 						dosWriter.flush();
 						dosWriter.close();
-						broadcastFile(name, file);
+
+						if(users.size() < 2 ){
+							sendMessage("Server", "file not sent. No users to send to");
+						} else {
+							broadcastFile(name, file);
+						}
+
 					} else if ( line.equals("serverCommandStartFileSend") ){ // start sending file
 						writeFileToOutput();
-					} else if (users.size() < 2){
-						sendMessage("Server", "message not broadcasted. No users to send to");
+					} else if ( users.size() < 2 ){ // prevent actions if no other connected users
+						sendMessage("Server", "message not sent. No users to send to");
 					} else {
 						broadcast(name,line); // method  of outer class - send messages to all
 					}

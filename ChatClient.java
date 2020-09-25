@@ -215,32 +215,6 @@ public class ChatClient extends JFrame implements ActionListener {
                     } else if(line.equals("File")) {
                         String originalFilename = br.readLine();
 
-                        // testing
-                            // File dir = new File("receiveFolder"); 
-                            // if( ! dir.exists()){
-                            //     dir.mkdirs();
-                            // }
-
-                            // File file = new File("receiveFolder/"+originalFilename);
-                            // file.createNewFile();
-
-                            // DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
-                            // DataInputStream disReader = new DataInputStream(client.getInputStream());
-                            // pw.println("serverCommandStartFileSend");
-                            // int count;
-                            // byte[] buffer = new byte[8192];
-                            // while ((count = disReader.read(buffer)) > 0)
-                            // {
-                            //     dosWriter.write(buffer, 0, count);
-                            //     if(disReader.available() < 1){
-                            //         break;
-                            //     }
-                            // }
-                            // dosWriter.flush();
-                            // dosWriter.close();
-                        // end of testing
-
-
                         String fileType = originalFilename.substring(originalFilename.lastIndexOf('.')+1);
                         String fileExt = "."+fileType;
                         FileNameExtensionFilter filter = new FileNameExtensionFilter(fileType, fileExt);
