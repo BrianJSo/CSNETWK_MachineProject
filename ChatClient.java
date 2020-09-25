@@ -1,3 +1,10 @@
+/**
+	CSNETWK-S14 Machine Project
+	Submitted by:
+	Cai, Mark Jayson X.
+	So, Brian Jezreel A.
+ */
+
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -22,14 +29,14 @@ public class ChatClient extends JFrame implements ActionListener {
     JFileChooser fc;
     
     public ChatClient(String uname,String serverAddress,int serverPort) throws Exception {
-        super("DLSUsap "+uname);  // set title for frame
+        super("DLSUsap "+uname);
         this.uname = uname;
         client = new Socket(serverAddress,serverPort);
         br = new BufferedReader( new InputStreamReader( client.getInputStream())) ;
         pw = new PrintWriter(client.getOutputStream(),true);
-        pw.println(uname);  // send name to server
+        pw.println(uname);
         buildInterface();
-        new MessagesThread().start();  // create thread for listening for messages
+        new MessagesThread().start();
     }
     
     public void buildInterface() {
@@ -58,7 +65,7 @@ public class ChatClient extends JFrame implements ActionListener {
         btnLogs.addActionListener(this);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                pw.println("serverCommandEnd");  // send end to server so that server know about the termination
+                pw.println("serverCommandEnd");
                 System.exit(0);
             }
         });
@@ -69,7 +76,7 @@ public class ChatClient extends JFrame implements ActionListener {
     
     public void actionPerformed(ActionEvent evt) {
         if ( evt.getSource() == btnExit ) {
-            pw.println("serverCommandEnd");  // send end to server so that server know about the termination
+            pw.println("serverCommandEnd");
             System.exit(0);
         } else if ( evt.getSource() == btnFile ){ // send file to server
             fc = new JFileChooser();
@@ -101,8 +108,7 @@ public class ChatClient extends JFrame implements ActionListener {
             }
         } else if ( evt.getSource() == btnLogs ){ // request logs from server
             pw.println("serverCommandGetLogs");
-        } else {
-            // send message to server
+        } else { // send message to server
             pw.println(tfInput.getText());
             taMessages.append("You: " + tfInput.getText() + "\n");
             tfInput.setText("");
@@ -162,7 +168,7 @@ public class ChatClient extends JFrame implements ActionListener {
         serverConnectFrame.add(errorPane);
         serverConnectFrame.setVisible(true);
 
-    } // end of main
+    }
 
     static class connectToServer implements ActionListener {
         public void actionPerformed(ActionEvent e){
@@ -188,7 +194,6 @@ public class ChatClient extends JFrame implements ActionListener {
         return ChatClient.this;
     }
     
-    // inner class for Messages Thread
     class  MessagesThread extends Thread {
         public void run() {
             String line;
@@ -254,8 +259,8 @@ public class ChatClient extends JFrame implements ActionListener {
                     } else { // receive message
                         taMessages.append(line + "\n");
                     }
-                } // end of while
+                }
             } catch(Exception ex) {}
         }
     }
-} //  end of client
+}

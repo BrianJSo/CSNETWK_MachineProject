@@ -1,4 +1,10 @@
-// Chat Server runs at port no. 9999
+/**
+	CSNETWK-S14 Machine Project
+	Submitted by:
+	Cai, Mark Jayson X.
+	So, Brian Jezreel A.
+ */
+
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -19,12 +25,12 @@ public class  ChatServer {
 			Socket client = server.accept();
 			HandleClient c = new HandleClient(client);
 			clients.add(c);
-		}  // end of while
+		}
 	}
 
 	public static void main(String ... args) throws Exception {
 		new ChatServer().process();
-	} // end of main
+	}
 
 	public void addLog(String source, String dest, String activity){
 		Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -35,7 +41,6 @@ public class  ChatServer {
 
 	public void broadcast(String user, String message)  {
 
-		// send message to all connected users
 		String destination = "";
 		for ( HandleClient c : clients )
 			if ( ! c.getUserName().equals(user) ){
@@ -48,7 +53,7 @@ public class  ChatServer {
 	}
 	
 	public void broadcastFile(String user, File file)  {
-		// send file to all connected users
+		
 		String destination = "";
 		for ( HandleClient c : clients )
 			if ( ! c.getUserName().equals(user) ){
@@ -66,7 +71,7 @@ public class  ChatServer {
 		File fileToSend;
 
 		public HandleClient(Socket  client) throws Exception {
-			// get input and output streams
+			
 			input = new BufferedReader( new InputStreamReader( client.getInputStream())) ;
 			output = new PrintWriter ( client.getOutputStream(),true);
 			this.client = client;
@@ -76,7 +81,7 @@ public class  ChatServer {
 			for(String user: users){
 				curUsers += ", "+user;
 			}
-			users.add(name); // add to vector
+			users.add(name);
 
 			if(users.size()<2){
 				sendMessage("Server","Successfully joined chat. No other participants.");
@@ -192,11 +197,11 @@ public class  ChatServer {
 					} else {
 						broadcast(name,line); // method  of outer class - send messages to all
 					}
-				} // end of while
+				}
 			} catch(Exception ex) {
 				System.out.println(ex.getMessage());
 			}
-		} // end of run()
-   } // end of inner class
+		}
+   }
 
-} // end of Server
+}
