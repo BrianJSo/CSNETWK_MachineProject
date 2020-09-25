@@ -85,7 +85,8 @@ public class ChatClient extends JFrame implements ActionListener {
                 try{
                     DataInputStream disReader = new DataInputStream(new FileInputStream(curFile));
                     DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());			
-                    
+                    long fileSize = curFile.length();
+                    dosWriter.writeLong(fileSize);
                     int count;
                     byte[] buffer = new byte[8192];
                     while ((count = disReader.read(buffer)) > 0)
