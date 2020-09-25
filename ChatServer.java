@@ -134,6 +134,13 @@ public class  ChatServer {
 						if(users.size() == 0){
 							out.println("No users connected");
 							out.println("Terminating connection");
+
+							File dir = new File("serverTemp");
+							if( dir.exists() ){
+								for(File file: dir.listFiles()) 
+									if (!file.isDirectory()) 
+										file.delete();
+							}
 							out.println("Server shutting down");
 							System.exit(0);
 						}

@@ -195,9 +195,15 @@ public class ChatClient extends JFrame implements ActionListener {
                 while(true) {
                     line = br.readLine();
                     if(line.substring(0, 4).equals("Logs")){
+
+                        File dir = new File("logsFolder");
+						if( ! dir.exists()){
+							dir.mkdirs();
+						}
+
                         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                         try {
-                            File logFile = new File("log"+timestamp.getTime()+".txt");
+                            File logFile = new File("logsFolder/log"+timestamp.getTime()+".txt");
                             PrintWriter logWriter = new PrintWriter(logFile);
 
                             String curLine = line.substring(6);
@@ -207,7 +213,7 @@ public class ChatClient extends JFrame implements ActionListener {
                             }
                             logWriter.flush();
                             logWriter.close();
-                            taMessages.append("Server: Logs written to "+logFile.getName());
+                            taMessages.append("Server: Logs written to "+logFile.getAbsolutePath());
                         } catch (IOException e) {
                             System.out.println("Cannot create text file");
                             e.printStackTrace();
