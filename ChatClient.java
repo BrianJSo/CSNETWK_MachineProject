@@ -194,7 +194,7 @@ public class ChatClient extends JFrame implements ActionListener {
             try {
                 while(true) {
                     line = br.readLine();
-                    if(line.substring(0, 4).equals("Logs")){
+                    if(line.substring(0, 4).equals("Logs")){ // receive logs
 
                         File dir = new File("logsFolder");
 						if( ! dir.exists()){
@@ -218,7 +218,7 @@ public class ChatClient extends JFrame implements ActionListener {
                             System.out.println("Cannot create text file");
                             e.printStackTrace();
                         }
-                    } else if(line.equals("File")) {
+                    } else if(line.equals("File")) { // receive file
                         String originalFilename = br.readLine();
 
                         String fileType = originalFilename.substring(originalFilename.lastIndexOf('.')+1);
@@ -238,19 +238,19 @@ public class ChatClient extends JFrame implements ActionListener {
                             DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(newFile));
                             DataInputStream disReader = new DataInputStream(client.getInputStream());
                             pw.println("serverCommandStartFileSend");
+                            long fileSize = disReader.readLong();
                             int count;
                             byte[] buffer = new byte[8192];
-                            while ((count = disReader.read(buffer)) > 0)
+                            while (fileSize > 0)
                             {
+                                count = disReader.read(buffer);
                                 dosWriter.write(buffer, 0, count);
-                                if(disReader.available() < 1){
-                                    break;
-                                }
+                                fileSize -= count;
                             }
                             dosWriter.flush();
                             dosWriter.close();
                         }
-                    } else {
+                    } else { // receive message
                         taMessages.append(line + "\n");
                     }
                 } // end of while

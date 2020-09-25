@@ -103,6 +103,8 @@ public class  ChatServer {
 			try{
 				DataInputStream disReader = new DataInputStream(new FileInputStream(fileToSend));
 				DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());
+				long fileSize = fileToSend.length();
+				dosWriter.writeLong(fileSize);
 				int count;
 				byte[] buffer = new byte[8192];
 				while ((count = disReader.read(buffer)) > 0)
