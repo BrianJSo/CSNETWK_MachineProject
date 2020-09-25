@@ -25,7 +25,7 @@ public class ChatClient extends JFrame implements ActionListener {
         super("DLSUsap "+uname);  // set title for frame
         this.uname = uname;
         client = new Socket(serverAddress,serverPort);
-        br = new BufferedReader( new InputStreamReader( client.getInputStream()) ) ;
+        br = new BufferedReader( new InputStreamReader( client.getInputStream())) ;
         pw = new PrintWriter(client.getOutputStream(),true);
         pw.println(uname);  // send name to server
         buildInterface();
@@ -74,7 +74,6 @@ public class ChatClient extends JFrame implements ActionListener {
         } else if ( evt.getSource() == btnFile ){ // send file to server
             fc = new JFileChooser();
             fc.setCurrentDirectory(new java.io.File("c:\\"));
-            // fc.setCurrentDirectory(new java.io.File("C:\\Users\\LenovoLegion\\Documents\\GitHub\\CSNETWK_MachineProject\\"));
             fc.setDialogTitle("Choose file to send");
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if(fc.showOpenDialog(btnFile)==JFileChooser.APPROVE_OPTION){
@@ -215,23 +214,50 @@ public class ChatClient extends JFrame implements ActionListener {
                         }
                     } else if(line.equals("File")) {
                         String originalFilename = br.readLine();
+
+                        // testing
+                            // File dir = new File("receiveFolder"); 
+                            // if( ! dir.exists()){
+                            //     dir.mkdirs();
+                            // }
+
+                            // File file = new File("receiveFolder/"+originalFilename);
+                            // file.createNewFile();
+
+                            // DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
+                            // DataInputStream disReader = new DataInputStream(client.getInputStream());
+                            // pw.println("serverCommandStartFileSend");
+                            // int count;
+                            // byte[] buffer = new byte[8192];
+                            // while ((count = disReader.read(buffer)) > 0)
+                            // {
+                            //     dosWriter.write(buffer, 0, count);
+                            //     if(disReader.available() < 1){
+                            //         break;
+                            //     }
+                            // }
+                            // dosWriter.flush();
+                            // dosWriter.close();
+                        // end of testing
+
+
                         String fileType = originalFilename.substring(originalFilename.lastIndexOf('.')+1);
                         String fileExt = "."+fileType;
                         FileNameExtensionFilter filter = new FileNameExtensionFilter(fileType, fileExt);
                         JFileChooser fc = new JFileChooser();
                         fc.setFileFilter(filter);
                         fc.setCurrentDirectory(new java.io.File("c:\\"));
-                        // fc.setCurrentDirectory(new java.io.File("C:\\Users\\LenovoLegion\\Documents\\GitHub\\CSNETWK_MachineProject\\"));
                         fc.setDialogTitle("Save file");
                         fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                         if(fc.showSaveDialog(getOuter())==JFileChooser.APPROVE_OPTION){
                             File path = fc.getSelectedFile();
+
                             File newFile = new File(path.getAbsolutePath()+fileExt);
-                            
                             newFile.createNewFile();
 
                             DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(newFile));
                             DataInputStream disReader = new DataInputStream(client.getInputStream());
+                            pw.println("serverCommandStartFileSend");
                             int count;
                             byte[] buffer = new byte[8192];
                             while ((count = disReader.read(buffer)) > 0)
@@ -241,6 +267,7 @@ public class ChatClient extends JFrame implements ActionListener {
                                     break;
                                 }
                             }
+                            dosWriter.flush();
                             dosWriter.close();
                         }
                     } else {

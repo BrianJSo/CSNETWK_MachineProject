@@ -1,6 +1,8 @@
 # files
 *.txt
 serverTemp/*
+filesToSend/*
+receiveFolder/*
 
 # Compiled class file
 *.class

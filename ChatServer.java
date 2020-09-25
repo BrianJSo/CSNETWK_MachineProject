@@ -60,6 +60,7 @@ public class  ChatServer {
 		BufferedReader input;
 		PrintWriter output;
 		Socket client;
+		File fileToSend;
 
 		public HandleClient(Socket  client) throws Exception {
 			// get input and output streams
@@ -92,8 +93,12 @@ public class  ChatServer {
 			sendMessage(uname,"sent "+file.getName());
 			output.println("File");
 			output.println(file.getName());
+			fileToSend = file;
+		}
+
+		public void writeFileToOutput(){
 			try{
-				DataInputStream disReader = new DataInputStream(new FileInputStream(file));
+				DataInputStream disReader = new DataInputStream(new FileInputStream(fileToSend));
 				DataOutputStream dosWriter = new DataOutputStream(client.getOutputStream());
 				int count;
 				byte[] buffer = new byte[8192];
@@ -102,7 +107,6 @@ public class  ChatServer {
 					dosWriter.write(buffer, 0, count);
 				}
 				dosWriter.flush();
-				out.println("Done here");
 				disReader.close();
 			} catch(Exception ex) {
 				ex.printStackTrace();
@@ -151,7 +155,6 @@ public class  ChatServer {
 
 						DataOutputStream dosWriter = new DataOutputStream(new FileOutputStream(file));
 						DataInputStream disReader = new DataInputStream(client.getInputStream());
-
 						int count;
 						byte[] buffer = new byte[8192];
 						while ((count = disReader.read(buffer)) > 0)
@@ -161,8 +164,11 @@ public class  ChatServer {
 								break;
 							}
 						}
+						dosWriter.flush();
 						dosWriter.close();
 						broadcastFile(name, file);
+					} else if ( line.equals("serverCommandStartFileSend") ){ // start sending file
+						writeFileToOutput();
 					} else if (users.size() < 2){
 						sendMessage("Server", "message not broadcasted. No users to send to");
 					} else {
